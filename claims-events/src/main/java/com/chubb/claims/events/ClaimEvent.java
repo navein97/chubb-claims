@@ -5,7 +5,8 @@ import java.time.Instant;
 import java.util.UUID;
 
 /**
- * Single envelope published to the {@code claims.events} topic, keyed by claimId.
+ * Single envelope published to the {@code claims.events} topic, keyed by claimId
+ * (so all events for one claim land on one partition, in order).
  *
  * Event-carried state transfer: every event carries the claim's current snapshot
  * (status, reserve, handler, version). Consumers never call back into claims-service,
@@ -23,12 +24,14 @@ public record ClaimEvent(
         long claimVersion,
         String market,
         String claimType,
+        String team,
         String status,
         UUID handlerId,
-        String team,
+        String handlerName,
         BigDecimal reserveAmount,
+        BigDecimal settledAmount,
         String currency,
-        BigDecimal settledAmount
+        Instant submittedAt
 ) {
     public static final String TOPIC = "claims.events";
 }

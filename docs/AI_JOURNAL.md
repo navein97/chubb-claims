@@ -33,6 +33,13 @@ Format per entry: **Asked / AI said / Outcome (accepted · challenged · overrod
 
 ---
 
+### 5. Outbox + Kafka (stage 4)
+- **Kafka Testcontainer wouldn't start** in the build sandbox (Postgres container was fine). Switched tests to spring-kafka-test's in-process KRaft broker: faster, no Docker dependency for Kafka. `docker compose` still runs real Kafka.
+- **Events vanished in the full test run but passed alone.** Cause: two Spring test contexts (one class had `@AutoConfigureMockMvc`, one didn't) → two outbox pollers + two embedded brokers sharing one Postgres. The first context's poller published the second test's events to *its* broker. Fixed by giving every IT one shared configuration.
+- **Outcome:** Overrode. **Why:** same failure mode as running two service instances against one outbox — which is exactly why the poller uses `FOR UPDATE SKIP LOCKED`. Good talking point for "what happens when you scale claims-service horizontally?"
+
+---
+
 <!-- Template for new entries
 ### N. <topic>
 - **Asked:**
