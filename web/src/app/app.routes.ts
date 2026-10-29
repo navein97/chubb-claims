@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { claimantGuard, homeRedirect } from './core/auth';
+import { claimantGuard, homeRedirect, staffGuard } from './core/auth';
 import { Login } from './login/login';
 import { Shell } from './shell/shell';
 
@@ -14,6 +14,12 @@ export const routes: Routes = [
     component: Shell,
     canActivate: [claimantGuard],
     loadChildren: () => import('./claimant/claimant.routes').then(m => m.CLAIMANT_ROUTES),
+  },
+  {
+    path: 'staff',
+    component: Shell,
+    canActivate: [staffGuard],
+    loadChildren: () => import('./staff/staff.routes').then(m => m.STAFF_ROUTES),
   },
   { path: '**', canActivate: [homeRedirect], children: [] },
 ];

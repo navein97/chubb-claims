@@ -17,7 +17,7 @@ import { AuthService } from '../core/auth';
         @if (auth.isStaff()) {
           <nav aria-label="Main">
             <a routerLink="/staff/queue" routerLinkActive="active">Queue</a>
-            <a routerLink="/staff/mine" routerLinkActive="active">My claims</a>
+            <a routerLink="/staff/mine" routerLinkActive="active">{{ auth.isManager() ? 'All claims' : 'My claims' }}</a>
             <a routerLink="/staff/dashboard" routerLinkActive="active">{{ auth.isManager() ? 'Dashboard' : 'Team' }}</a>
           </nav>
         } @else {
