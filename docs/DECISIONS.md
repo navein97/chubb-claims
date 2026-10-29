@@ -23,3 +23,21 @@ Every event carries the claim snapshot (status, reserve, handler, `claimVersion`
 
 ## D6 — One Postgres, database-per-service
 One container for local simplicity, but separate databases and no cross-service reads.
+
+## D7 — Explicit command endpoints, not PATCH /status
+`POST /claims/{id}/pick-up`, `/approve`, `/reject`… Each business action has its own payload and rules (approve needs an amount, reject needs a reason). A generic status PATCH pushes that logic into a switch statement and makes the API contract vague.
+
+## D8 — Backend tells the UI what's allowed (`allowedActions`)
+Claim detail returns the actions the current user may take. The Angular app renders buttons from it, so UI rules can't drift from server rules. The server still re-checks every command.
+
+## D9 — Two views of one claim
+Claimants never see the reserve, internal history entries, or staff names. Same endpoint, response shaped by role.
+
+## D10 — 404 for claims you can't see
+A claimant probing another claim's id, or a handler outside the team, gets 404 rather than 403, so the existence of a claim is not confirmed.
+
+## D11 — Optimistic locking for concurrent work
+`@Version` on the claim. Two handlers picking up the same claim: one wins, the other gets 409 "refresh and try again". Tested with a real race against Postgres.
+
+## D12 — Dev auth only
+Seeded users and `Authorization: Bearer <userId>`. Production would be OIDC (Azure AD for staff, a customer IdP for claimants) with role/team from JWT claims; only `DevAuthFilter` changes.

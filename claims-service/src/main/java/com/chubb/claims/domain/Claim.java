@@ -32,7 +32,7 @@ public class Claim {
     private String reference;
 
     @Version
-    private long version;
+    private Long version;
 
     // --- what happened ---
     @Column(nullable = false)
@@ -181,7 +181,8 @@ public class Claim {
     public void updateReserve(Actor actor, BigDecimal newReserve, String reason) {
         requireOwnerOrManager(actor);
         requireNonNegative(newReserve, "Reserve");
-        if (!status.isOpen()) {
+        // Once approved, the reserve is the agreed settlement amount and is locked.
+        if (!status.isOpen() || status == ClaimStatus.APPROVED) {
             throw DomainException.conflict("Cannot change reserve on a " + status + " claim");
         }
         BigDecimal old = reserveAmount;
@@ -245,6 +246,40 @@ public class Claim {
     }
 
     // ------------------------------------------------------------------ visibility
+
+    /**
+     * Actions this actor may take right now. The frontend renders buttons from this list,
+     * so UI rules never drift from backend rules. The mutating methods still re-check.
+     */
+    public java.util.Set<ClaimAction> allowedActions(Actor actor) {
+        var actions = java.util.EnumSet.noneOf(ClaimAction.class);
+        if (actor.role() == Role.CLAIMANT) {
+            if (actor.id().equals(claimantId) && status == ClaimStatus.AWAITING_INFO) {
+                actions.add(ClaimAction.PROVIDE_INFO);
+            }
+            return actions;
+        }
+        if (status == ClaimStatus.SUBMITTED && actor.role() == Role.HANDLER
+                && team.equals(actor.team()) && assignedHandlerId == null) {
+            actions.add(ClaimAction.PICK_UP);
+        }
+        boolean ownerOrManager = actor.role() == Role.MANAGER
+                || (actor.role() == Role.HANDLER && actor.id().equals(assignedHandlerId));
+        if (!ownerOrManager) {
+            return actions;
+        }
+        switch (status) {
+            case ASSIGNED -> actions.add(ClaimAction.START_ASSESSMENT);
+            case UNDER_ASSESSMENT -> actions.addAll(java.util.EnumSet.of(
+                    ClaimAction.REQUEST_INFO, ClaimAction.APPROVE, ClaimAction.REJECT));
+            case APPROVED -> actions.add(ClaimAction.SETTLE);
+            default -> { }
+        }
+        if (status.isOpen() && status != ClaimStatus.APPROVED) {
+            actions.add(ClaimAction.UPDATE_RESERVE);
+        }
+        return actions;
+    }
 
     public boolean isVisibleTo(Actor actor) {
         return switch (actor.role()) {
@@ -310,7 +345,7 @@ public class Claim {
 
     public UUID getId() { return id; }
     public String getReference() { return reference; }
-    public long getVersion() { return version; }
+    public long getVersion() { return version == null ? 0 : version; }
     public UUID getClaimantId() { return claimantId; }
     public String getClaimantName() { return claimantName; }
     public String getPolicyNumber() { return policyNumber; }

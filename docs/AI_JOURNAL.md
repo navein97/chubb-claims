@@ -25,6 +25,14 @@ Format per entry: **Asked / AI said / Outcome (accepted · challenged · overrod
 
 ---
 
+### 4. Bugs the tests caught in AI-generated code (stage 3)
+- **Lost domain events:** service drained pending events from the instance returned by `save()`. With a primitive `long @Version`, Spring Data treats the entity as existing and calls `merge()`, which returns a *copy* without the transient event list. Fixed: wrapper `Long` version (so `persist()` is used) and drain events from the original instance.
+- **LazyInitializationException risk:** controllers map DTOs after the transaction closes (open-in-view off). Fixed by initialising history/info requests inside the service transaction.
+- **Testcontainers 1.21.3 vs Docker Engine 29:** API version too old. Pinned 1.21.4.
+- **Outcome:** Overrode the first versions. **Why:** the integration test against real Postgres is what exposed these — unit tests alone would have passed.
+
+---
+
 <!-- Template for new entries
 ### N. <topic>
 - **Asked:**
