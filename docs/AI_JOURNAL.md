@@ -40,6 +40,14 @@ Format per entry: **Asked / AI said / Outcome (accepted · challenged · overrod
 
 ---
 
+### 6. Insights service (stage 5)
+- **`asOf` crashed on an empty dashboard:** `max()` over an empty table returns one NULL row, and `query(Timestamp.class).single()` rejects null. Caught because the test checks the empty state first. Fixed by mapping the row manually.
+- **Dead-letter topic name:** first version created `claims.events.DLT`; Spring Kafka 3.x publishes to `claims.events-dlt`, so poison messages went to an auto-created topic. Caught by the DLT assertion.
+- **Docker image build** can't download Maven deps inside the AI's sandbox (proxy), so the cross-service smoke test ran the jars against compose Postgres/Kafka. To verify on my machine: `docker compose up --build`.
+- **Outcome:** Overrode. **Why:** both bugs were silent in normal use — only edge-case tests exposed them.
+
+---
+
 <!-- Template for new entries
 ### N. <topic>
 - **Asked:**

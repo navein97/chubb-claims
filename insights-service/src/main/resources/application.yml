@@ -8,10 +8,6 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/insights}
     username: ${DB_USER:claims}
     password: ${DB_PASSWORD:claims}
-  jpa:
-    open-in-view: false
-    hibernate:
-      ddl-auto: validate
   flyway:
     enabled: true
   kafka:
@@ -19,9 +15,26 @@ spring:
     consumer:
       group-id: insights-service
       auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      # only used to forward poison messages to the dead-letter topic
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    listener:
+      concurrency: 3
 
 management:
   endpoints:
     web:
       exposure:
         include: health,info
+
+# DEV ONLY: staff identities matching claims-service's seeded users.
+# In production both services validate the same IdP-issued JWT independently.
+dev:
+  staff:
+    - { id: 00000000-0000-0000-0000-00000000a001, name: Lim Hui Min, role: HANDLER, team: MY-MOTOR }
+    - { id: 00000000-0000-0000-0000-00000000a002, name: Raj Kumar,   role: HANDLER, team: MY-MOTOR }
+    - { id: 00000000-0000-0000-0000-00000000a003, name: Wei Ling,    role: HANDLER, team: SG-PROPERTY }
+    - { id: 00000000-0000-0000-0000-00000000b001, name: Grace Wong,  role: MANAGER, team: MY-MOTOR }

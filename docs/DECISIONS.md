@@ -41,3 +41,15 @@ A claimant probing another claim's id, or a handler outside the team, gets 404 r
 
 ## D12 — Dev auth only
 Seeded users and `Authorization: Bearer <userId>`. Production would be OIDC (Azure AD for staff, a customer IdP for claimants) with role/team from JWT claims; only `DevAuthFilter` changes.
+
+## D13 — Insights is a disposable projection
+One row per claim in `claim_projection`, upserted in a single SQL statement guarded by `claim_version`. Duplicates and stale/out-of-order events are no-ops, so the consumer is idempotent without a dedupe table. The table can be dropped and rebuilt by replaying `claims.events` from offset 0. Queries use plain SQL (JdbcClient): aggregations, no domain model needed.
+
+## D14 — Poison messages go to a dead-letter topic
+3 retries for transient failures, then `claims.events-dlt`. Unparseable JSON skips the retries. One bad message can't stall a partition and freeze the dashboards.
+
+## D15 — Eventual consistency is shown, not hidden
+Dashboards return `asOf` (time of the latest event reflected). Managers get near-real-time exposure without the reporting load ever touching the transactional database.
+
+## D16 — Each service validates tokens itself
+Insights doesn't call claims-service to check who you are. In production both validate the same IdP JWT; in dev both read the same seeded IDs. Insights is staff-only: claimants get 403, handlers are pinned to their team.
