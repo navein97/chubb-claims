@@ -1,0 +1,215 @@
+/*
+ * Design tokens. A claims tool lives on paper forms and ledgers: cool form-paper background,
+ * one deep "policy green" for primary actions, amber reserved for "someone is waiting on you",
+ * red only for rejection/destructive. Money is always tabular.
+ */
+:root {
+  --bg: #eef1ef;
+  --surface: #ffffff;
+  --ink: #16232b;
+  --muted: #586770;
+  --line: #d3dad8;
+  --line-strong: #b4bfbc;
+  --primary: #0e5a4a;
+  --primary-hover: #0a4739;
+  --primary-soft: #e3f1ec;
+  --attention: #9a5b00;
+  --attention-soft: #fff3df;
+  --attention-line: #f0c27a;
+  --danger: #a3341f;
+  --danger-soft: #fbe9e5;
+  --focus: #2f6fd6;
+
+  --radius: 6px;
+  --radius-lg: 10px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --font: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.5rem;
+  --text-2xl: 2rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: var(--text-base);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { margin: 0; line-height: 1.2; letter-spacing: -0.01em; }
+h1 { font-size: var(--text-xl); font-weight: 700; }
+h2 { font-size: var(--text-lg); font-weight: 600; }
+h3 { font-size: var(--text-base); font-weight: 600; }
+p { margin: 0; }
+
+a { color: var(--primary); }
+a:hover { color: var(--primary-hover); }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: var(--text-sm); }
+
+/* ---------- page frame ---------- */
+.page {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-5) var(--space-7);
+}
+.page--narrow { max-width: 760px; }
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
+  flex-wrap: wrap;
+}
+.page-head p { margin-top: var(--space-1); color: var(--muted); }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+.panel + .panel { margin-top: var(--space-4); }
+.panel h2 { margin-bottom: var(--space-3); }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 38px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+.btn:hover { border-color: var(--ink); color: var(--ink); }
+.btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+.btn--primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); color: #fff; }
+.btn--danger { color: var(--danger); border-color: #e1b1a7; }
+.btn--danger:hover { border-color: var(--danger); color: var(--danger); }
+.btn--quiet { border-color: transparent; background: transparent; color: var(--muted); }
+.btn--quiet:hover { color: var(--ink); border-color: transparent; }
+
+/* ---------- forms ---------- */
+.field { display: flex; flex-direction: column; gap: var(--space-1); }
+.field label { font-weight: 600; font-size: var(--text-sm); }
+.field .hint { font-size: var(--text-sm); color: var(--muted); }
+.field input, .field select, .field textarea {
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+  min-height: 40px;
+}
+.field textarea { min-height: 96px; resize: vertical; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  border-color: var(--focus);
+  outline: 2px solid color-mix(in srgb, var(--focus) 30%, transparent);
+  outline-offset: 0;
+}
+.field .error { color: var(--danger); font-size: var(--text-sm); }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+.form-grid .span-2 { grid-column: span 2; }
+@media (max-width: 640px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid .span-2 { grid-column: auto; }
+}
+
+/* ---------- feedback ---------- */
+.notice {
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+.notice--error { background: var(--danger-soft); border-color: #eab9ae; color: #6e2214; }
+.notice--attention { background: var(--attention-soft); border-color: var(--attention-line); color: #5c3700; }
+.notice--ok { background: var(--primary-soft); border-color: #b6d9cd; color: #0a4436; }
+
+.empty {
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+  color: var(--muted);
+}
+.empty p + p { margin-top: var(--space-2); }
+
+/* ---------- tables ---------- */
+.table-wrap { overflow-x: auto; }
+table.data { width: 100%; border-collapse: collapse; }
+table.data th {
+  text-align: left;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--muted);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--line-strong);
+  white-space: nowrap;
+}
+table.data td {
+  padding: var(--space-3);
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+table.data tr:last-child td { border-bottom: 0; }
+table.data td.right, table.data th.right { text-align: right; }
+table.data tbody tr.clickable { cursor: pointer; }
+table.data tbody tr.clickable:hover td { background: #f6f8f7; }
+
+/* ---------- status chip ---------- */
+.chip {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  background: #e8ecea;
+  color: var(--ink);
+}
+.chip--attention { background: var(--attention-soft); color: var(--attention); box-shadow: inset 0 0 0 1px var(--attention-line); }
+.chip--done { background: var(--primary-soft); color: var(--primary); }
+.chip--danger { background: var(--danger-soft); color: var(--danger); }
+.chip--new { background: #e6eefb; color: #1d4f9c; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

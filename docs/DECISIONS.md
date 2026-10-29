@@ -31,7 +31,7 @@ One container for local simplicity, but separate databases and no cross-service 
 Claim detail returns the actions the current user may take. The Angular app renders buttons from it, so UI rules can't drift from server rules. The server still re-checks every command.
 
 ## D9 — Two views of one claim
-Claimants never see the reserve, internal history entries, or staff names. Same endpoint, response shaped by role.
+Claimants never see the reserve, internal history entries (reserve changes) or who performed each action. Same endpoint, response shaped by role.
 
 ## D10 — 404 for claims you can't see
 A claimant probing another claim's id, or a handler outside the team, gets 404 rather than 403, so the existence of a claim is not confirmed.
@@ -53,3 +53,12 @@ Dashboards return `asOf` (time of the latest event reflected). Managers get near
 
 ## D16 — Each service validates tokens itself
 Insights doesn't call claims-service to check who you are. In production both validate the same IdP JWT; in dev both read the same seeded IDs. Insights is staff-only: claimants get 403, handlers are pinned to their team.
+
+## D17 — One Angular app, two lazy-loaded areas
+`/claimant/**` and `/staff/**` are separate lazy route trees behind role guards, sharing one core (auth, API client, formatting) and a few presentational components. A claimant's browser never downloads staff screens. Guards are UX only; the backend enforces every rule again.
+
+## D18 — The backend owns the API contract
+TypeScript types are generated from each service's OpenAPI spec (`npm run api:types`), so a renamed field breaks the Angular build instead of failing at runtime. A thin hand-written service wraps HttpClient on top of the generated types.
+
+## D19 — Async in the UI: polling with visible freshness
+Open screens re-fetch every 10–15s while the tab is visible. Simple and good enough for claims that change over hours. SSE/WebSocket push from a notifications consumer on `claims.events` is the next step.
