@@ -62,3 +62,6 @@ TypeScript types are generated from each service's OpenAPI spec (`npm run api:ty
 
 ## D19 — Async in the UI: polling with visible freshness
 Open screens re-fetch every 10–15s while the tab is visible. Simple and good enough for claims that change over hours. SSE/WebSocket push from a notifications consumer on `claims.events` is the next step.
+
+## D20 — Approval authority limits per market
+Claims officers can approve up to a per-market limit (e.g. MYR 20,000, SGD 8,000); above that only a claims manager can. Enforced in the `Claim` aggregate (403 for an officer over the limit), exposed to officers as `approvalLimit` so the UI can warn before they try. Limits live in the `Market` enum for now; in production they'd be per-person configuration with an escalation queue.

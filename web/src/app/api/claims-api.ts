@@ -283,6 +283,7 @@ export interface components {
             infoRequests?: components["schemas"]["InfoRequestView"][];
             timeline?: components["schemas"]["TimelineEntry"][];
             allowedActions?: ("PICK_UP" | "START_ASSESSMENT" | "REQUEST_INFO" | "UPDATE_RESERVE" | "APPROVE" | "REJECT" | "SETTLE" | "PROVIDE_INFO")[];
+            approvalLimit?: number;
         };
         InfoRequestView: {
             /** Format: uuid */

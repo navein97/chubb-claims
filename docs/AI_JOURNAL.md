@@ -1,6 +1,8 @@
 # AI Working Journal
 
 Running log of how I used AI on this build: what I asked, what I accepted, what I challenged or overrode, and why.
+
+**How I worked:** Claude (Anthropic) drafted most of the code. My role was scoping the brief, setting the working method, reviewing each stage, making product calls, and verifying that it runs on my own machine. Entries are honest about which decisions were mine and which were the AI's recommendation that I accepted.
 Format per entry: **Asked / AI said / Outcome (accepted · challenged · overrode) / Why.**
 
 ---
@@ -14,8 +16,8 @@ Format per entry: **Asked / AI said / Outcome (accepted · challenged · overrod
 ### 2. .NET vs Spring Boot
 - **Asked:** Which backend to use.
 - **AI said:** Spring Boot — Kafka is first-class in Java (Spring Kafka retries/DLT), Testcontainers + springdoc are well trodden.
-- **Outcome:** Accepted. Java 21 + Spring Boot 3.5.
-- **Why:** _(add your own reason — e.g. which one you're more fluent in)_
+- **Outcome:** Accepted the recommendation. Java 21 + Spring Boot 3.5.
+- **Why:** I had no strong preference between the two; the Kafka tooling argument was the deciding factor.
 
 ### 3. "Just build the whole thing"
 - **Asked:** Build the entire app in one go.
@@ -59,6 +61,24 @@ Format per entry: **Asked / AI said / Outcome (accepted · challenged · overrod
 ### 8. Packaging (stage 8)
 - **Demo seeder** creates claims through the real application service, not SQL inserts, so events flow through the outbox and the dashboards fill up the same way production would.
 - **nginx** serves the Angular build and reverse-proxies both APIs on one origin: no CORS config, same paths as the dev proxy.
+
+---
+
+### 9. Challenged: do we really need Docker and Kafka?
+- **Asked:** The AI's sandbox couldn't run Docker/Kafka at first, so I asked whether a lighter alternative would do.
+- **AI said:** Keep both. The brief explicitly asks for REST *and* Kafka and an explanation of which uses which; swapping Kafka for an in-memory queue throws that away. Docker Compose is also what lets the panel run it with one command.
+- **Outcome:** Accepted. Opened the sandbox network instead so the AI could build and test against real Postgres/Kafka.
+
+### 10. Verified on my own machine
+- Ran `docker compose up --build` on Windows (Docker Desktop): all containers built and started, insights consumer joined Kafka.
+- Walked the full flow by hand: claimant reports a claim → officer picks up, adjusts reserve, asks for info → claimant replies → officer approves and marks paid → manager dashboard updates. Also ran the pick-up race in two browsers.
+- Switched delivery from zip downloads to GitHub so every stage is a pull, not a re-download.
+
+### 11. My call: approval limits
+- **Asked:** The AI listed open product decisions, including that any officer could approve any amount.
+- **Decided:** Add a limit. An officer approving a large claim alone is the kind of control an insurer would not accept.
+- **Built:** per-market limit (e.g. MYR 20,000) enforced in the domain (403 above it), shown in the officer's approve form, two new domain tests. Managers can approve any amount.
+- **Left as-is (AI default, reviewed but not changed):** starting reserve = the claimant's estimate; rejection only possible once the claimant has replied.
 
 ---
 

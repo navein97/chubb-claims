@@ -91,7 +91,9 @@ public final class ClaimDtos {
             String decisionReason, Instant submittedAt, Instant updatedAt,
             List<InfoRequestView> infoRequests,
             List<TimelineEntry> timeline,
-            Set<ClaimAction> allowedActions) {
+            Set<ClaimAction> allowedActions,
+            /** Officer's own approval limit for this claim's market; only sent to officers. */
+            BigDecimal approvalLimit) {
 
         static ClaimDetail of(Claim c, Actor viewer) {
             boolean staff = viewer.isStaff();
@@ -109,7 +111,8 @@ public final class ClaimDtos {
                     c.getDecisionReason(), c.getSubmittedAt(), c.getUpdatedAt(),
                     c.getInfoRequests().stream().map(InfoRequestView::of).toList(),
                     timeline,
-                    c.allowedActions(viewer));
+                    c.allowedActions(viewer),
+                    viewer.role() == Role.HANDLER ? c.getMarket().handlerApprovalLimit() : null);
         }
     }
 }

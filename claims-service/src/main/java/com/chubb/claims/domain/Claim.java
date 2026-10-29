@@ -201,6 +201,11 @@ public class Claim {
         if (amount.signum() == 0) {
             throw DomainException.invalid("Approved amount must be greater than zero");
         }
+        // Authority limit: officers approve up to their market's limit; above that, a manager must.
+        if (actor.role() == Role.HANDLER && amount.compareTo(market.handlerApprovalLimit()) > 0) {
+            throw DomainException.forbidden("Above your approval limit of " + market.handlerApprovalLimit()
+                    + " " + currency + ". A claims manager must approve this claim.");
+        }
         transition(actor, ClaimStatus.APPROVED, "Approved for " + amount + " " + currency, true);
         settledAmount = amount;
         decisionReason = reason;

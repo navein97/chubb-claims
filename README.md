@@ -85,7 +85,7 @@ Reserve (expected cost) starts at the claimant's estimate, is revised during ass
 ## Tests
 
 ```bash
-mvn verify                      # 21 backend tests: domain rules, API, outbox→Kafka, projection (needs Docker for Postgres)
+mvn verify                      # 23 backend tests: domain rules, API, outbox→Kafka, projection (needs Docker for Postgres)
 cd web && npx ng test --watch=false   # 9 frontend unit tests
 ```
 
@@ -103,7 +103,7 @@ npm run api:types                      # regenerate TS types from the running se
 
 ## What's built, what's cut
 
-**Built:** claim lifecycle and rules, role-based views, team queues, info requests, reserves, approve/reject/settle, optimistic locking, transactional outbox, idempotent Kafka projection with DLT, exposure and workload dashboards, Angular claimant and staff apps, seeded demo data.
+**Built:** claim lifecycle and rules, role-based views, team queues, info requests, reserves, approve/reject/settle, per-market approval limits, optimistic locking, transactional outbox, idempotent Kafka projection with DLT, exposure and workload dashboards, Angular claimant and staff apps, seeded demo data.
 
 **Cut on purpose** (time box):
 - Real authentication. Dev login only; designed so OIDC replaces two classes.
@@ -111,11 +111,10 @@ npm run api:types                      # regenerate TS types from the running se
 - Payments. "Mark as paid" records that payment happened elsewhere.
 - Notifications (email/SMS/push). The event stream is ready for a consumer.
 - FX. Exposure is reported per currency.
-- Approval authority limits per handler and market.
 
 ## With more time
 
-1. Approval limits: handlers approve up to a per-market limit, above that it routes to a manager.
+1. Escalation queue: over-limit claims routed to a manager automatically; limits configurable per person instead of per market.
 2. Notifications service consuming `claims.events`; push status changes to the UI over SSE instead of polling.
 3. Document upload to object storage with virus scanning, linked to info requests.
 4. Real auth: OIDC (Azure AD for staff, customer IdP for claimants), roles and team from token claims.

@@ -139,6 +139,23 @@ class ClaimTest {
         }
 
         @Test
+        void officerCannotApproveAboveMarketLimit_managerCan() {
+            // MY limit is MYR 20,000
+            assertThatThrownBy(() -> claim.approve(handler, new BigDecimal("20000.01"), null))
+                    .extracting("kind").isEqualTo(DomainException.Kind.FORBIDDEN);
+            assertThat(claim.getStatus()).isEqualTo(ClaimStatus.UNDER_ASSESSMENT);
+
+            claim.approve(manager, new BigDecimal("25000.00"), "Approved by manager");
+            assertThat(claim.getStatus()).isEqualTo(ClaimStatus.APPROVED);
+        }
+
+        @Test
+        void officerCanApproveExactlyAtLimit() {
+            claim.approve(handler, new BigDecimal("20000.00"), null);
+            assertThat(claim.getStatus()).isEqualTo(ClaimStatus.APPROVED);
+        }
+
+        @Test
         void rejectZeroesReserveAndIsTerminal() {
             claim.reject(handler, "Policy lapsed before incident date");
             assertThat(claim.getReserveAmount()).isEqualByComparingTo("0");

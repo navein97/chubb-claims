@@ -117,7 +117,14 @@ import { Timeline } from '../shared/timeline';
                       <label for="approve-reason">Note for the claimant (optional)</label>
                       <input id="approve-reason" name="approveReason" [(ngModel)]="approveReason" />
                     </div>
-                    <button class="btn btn--primary" type="submit" [disabled]="busy() || !(approveAmount > 0)">Approve claim</button>
+                    @if (overLimit(c)) {
+                      <p class="notice notice--attention small" role="status">
+                        Above your approval limit of {{ money(c.approvalLimit, c.currency) }}. Ask a claims manager to approve this claim.
+                      </p>
+                    } @else if (c.approvalLimit != null) {
+                      <p class="small muted">You can approve up to {{ money(c.approvalLimit, c.currency) }}.</p>
+                    }
+                    <button class="btn btn--primary" type="submit" [disabled]="busy() || !(approveAmount > 0) || overLimit(c)">Approve claim</button>
                   </form>
                 }
                 @if (tab() === 'info' && can('REQUEST_INFO')) {
@@ -236,6 +243,11 @@ export class StaffClaim {
   constructor() {
     effect(() => this.load(this.id()));
     poll(() => this.load(this.id()), 15000);
+  }
+
+  /** UI hint only: the backend rejects over-limit approvals with 403 regardless. */
+  overLimit(c: ClaimDetail): boolean {
+    return c.approvalLimit != null && Number(this.approveAmount) > c.approvalLimit;
   }
 
   can(action: ClaimAction): boolean {
