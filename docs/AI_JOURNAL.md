@@ -48,6 +48,20 @@ Format per entry: **Asked / AI said / Outcome (accepted · challenged · overrod
 
 ---
 
+### 7. Angular app (stages 6–7)
+- **Angular version:** CLI scaffolded Angular 22 (newer than the AI's training data). Kept it, wrote conservative code (standalone components, signals, `@if/@for`), and relied on the compiler and a headless browser run to catch anything version-specific. Zoneless by default, so all state is signals.
+- **Contract from the backend:** generated TS types from both OpenAPI specs instead of hand-writing interfaces. Downside spotted: springdoc marks every response field optional, so templates need null handling. Two compile errors from exactly that were fixed.
+- **Bug caught on review:** after a failed action (e.g. 409), the claim screen re-fetched and the refresh cleared the error message before the user could read it. Fixed with a `keepError` flag on reload.
+- **Copy:** rejected status names like "UNDER_ASSESSMENT" for claimants; used plain language ("Being assessed", "We need more information") and kept internal names for staff.
+- **Verified** every screen with Playwright: full claimant and staff flows, a lost pick-up race, manager dashboard, 390px mobile, zero console errors.
+- **Outcome:** Mostly accepted, with the fixes above. **Why:** the UI is secondary in the brief, so effort went to flows that show the backend decisions (allowedActions, 409 handling, freshness).
+
+### 8. Packaging (stage 8)
+- **Demo seeder** creates claims through the real application service, not SQL inserts, so events flow through the outbox and the dashboards fill up the same way production would.
+- **nginx** serves the Angular build and reverse-proxies both APIs on one origin: no CORS config, same paths as the dev proxy.
+
+---
+
 <!-- Template for new entries
 ### N. <topic>
 - **Asked:**

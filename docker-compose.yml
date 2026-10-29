@@ -42,6 +42,7 @@ services:
     environment:
       DB_URL: jdbc:postgresql://postgres:5432/claims
       KAFKA_BOOTSTRAP: kafka:29092
+      CLAIMS_SEED_DEMO_DATA: "true"
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_healthy }
@@ -57,3 +58,10 @@ services:
     depends_on:
       postgres: { condition: service_healthy }
       kafka: { condition: service_healthy }
+
+  web:
+    build: ./web
+    ports: ["8080:80"]
+    depends_on:
+      - claims-service
+      - insights-service
